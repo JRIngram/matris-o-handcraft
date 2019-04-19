@@ -16,6 +16,8 @@ import copy
 from keras.models import Sequential
 from keras.layers import Dense
 import numpy as np
+import pickle
+import time
 
 random.seed(0)
 def gen_batch(samples):
@@ -23,6 +25,11 @@ def gen_batch(samples):
     Generates a batch of samples for column differences
     """
     column_differences = []
+    column_differences.append([0,0,0,0,0,0,0,0,0,0])
+    column_differences.append([0,0,2,0,0,0,0,0,0,0])
+    column_differences.append([0,0,0,0,2,0,0,0,0,0])
+    column_differences.append([0,0,0,0,0,0,2,0,0,0])
+    column_differences.append([0,0,0,0,0,0,0,0,2,0])
     for x in range(0, samples):
         column_difference = [0]
         for y in range(0,9):
@@ -55,7 +62,6 @@ def gen_batch(samples):
                             break
         print(column_difference)
         column_differences.append(column_difference)
-
     return column_differences
 
 def create_appended_batches(batches):
@@ -130,7 +136,7 @@ def create_target(column_number):
         if x == column_number or x == (10 + column_number) or x == (20 + column_number) or x == (30 + column_number):
             target.append(2)
         """
-        if x == column_number:
+        if x == column_number - 1:
             target.append(2)
         else:
             target.append(0)
@@ -143,8 +149,18 @@ def convert_array_to_numpy(array):
     x = np.array([array])
     return np.array([array])
 
-batch_number = 1000
-appended_batches = create_appended_batches(gen_batch(batch_number))
+def save_neural_network(neural_net):
+        """
+        Serializes the neural network.
+        """
+        file_path = "trim-" + str(time.strftime("%d-%m-%y_%H:%M:%S"))
+        agent_information = [0.1, False, False, neural_net]
+        handler = open(file_path + ".obj", 'wb')
+        pickle.dump(agent_information, handler)
+        handler.close()
+
+batch_number = 1000 
+appended_batches = create_appended_batches(gen_batch(batch_number - 5))
 neural_net = Sequential()
 neural_net.add(Dense(10, input_dim=10, activation='tanh'))
 neural_net.add(Dense(10, activation='linear'))
@@ -161,21 +177,33 @@ target = []
 for x in range(0, batch_number):
     training.append(appended_batches[x][0])
     target.append(appended_batches[x][1])
-for x in range(0, 30000):
+for x in range(0, 30000): #Decides number of rounds of training
     for training_round in range(0, batch_number):
-        print("Round: " + str(x) + " / " + str(10000))
+        print("Round: " + str(x) + " / " + str(30000))
         print("Batch: " + str(training_round))
         training_data = convert_array_to_numpy(training[training_round])
         target_data = convert_array_to_numpy(target[training_round])
         neural_net.fit(training_data, target_data, epochs=1)
-print(str([0,0,0,0,0,0,0,0,0,0]))
-print(neural_net.predict(convert_array_to_numpy([0,0,0,0,0,0,0,0,0,0])))
 print("***********************\n"+str([0,0,4,4,-4,4,2,2,-2,-4]))
 print(neural_net.predict(convert_array_to_numpy([0,0,4,4,-4,4,2,2,-2,-4])))
 print("***********************\n"+str([0,8,0,0,-4,4,2,2,-2,-4]))
 print(neural_net.predict(convert_array_to_numpy([0,8,0,0,-4,4,2,2,-2,-4])))
 print("***********************\n"+str([0,8,0,0,-4,4,0,0,-2,-4]))
 print(neural_net.predict(convert_array_to_numpy([0,8,0,0,-4,4,0,0,-2,-4])))
+print("***********************\n"+str([0,0,0,0,0,0,0,0,0,0]))
+print(neural_net.predict(convert_array_to_numpy([0,0,0,0,0,0,0,0,0,0])))
+print("***********************\n"+str([0,0,2,0,0,0,0,0,0,0]))
+print(neural_net.predict(convert_array_to_numpy([0,0,2,0,0,0,0,0,0,0])))
+print("***********************\n"+str([0,0,2,0,0,0,0,0,0,0]))
+print(neural_net.predict(convert_array_to_numpy([0,0,2,0,0,0,0,0,0,0])))
+print("***********************\n"+str([0,0,0,0,2,0,0,0,0,0]))
+print(neural_net.predict(convert_array_to_numpy([0,0,0,0,2,0,0,0,0,0])))
+print("***********************\n"+str([0,0,0,0,0,0,2,0,0,0]))
+print(neural_net.predict(convert_array_to_numpy([0,0,0,0,0,0,2,0,0,0])))
+print("***********************\n"+str([0,0,0,0,0,0,0,0,2,0]))
+print(neural_net.predict(convert_array_to_numpy([0,0,0,0,0,0,0,0,2,0])))
+print("***********************\nSaving neural network.")
+save_neural_network(neural_net)
 print("done")
 
 
