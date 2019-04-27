@@ -143,9 +143,9 @@ def create_target(column_number):
     return target
 
 def convert_array_to_numpy(array):
-    #numpy_array = np.zeros((len(array), 1))
-    #for x in range(0, len(array)):
-     #   numpy_array[x,0] = array[x]
+    """
+    Converts a standard python array to a numpy array
+    """
     x = np.array([array])
     return np.array([array])
 
@@ -159,8 +159,10 @@ def save_neural_network(neural_net):
         pickle.dump(agent_information, handler)
         handler.close()
 
-batch_number = 1000 
-appended_batches = create_appended_batches(gen_batch(batch_number - 5))
+batch_number = 1000 #Number of batches to train on
+episodes = 30000 #Decides number of episodes of training
+appended_batches = create_appended_batches(gen_batch(batch_number - 5)) #-5 due to hard-coded non-random batches to train ANN to clear line.
+#Create ANN
 neural_net = Sequential()
 neural_net.add(Dense(10, input_dim=10, activation='tanh'))
 neural_net.add(Dense(10, activation='linear'))
@@ -168,22 +170,23 @@ neural_net.add(Dense(10, activation='linear'))
 neural_net.compile(loss='mean_squared_error',
     optimizer='sgd',
     metrics=['accuracy'])
-x = appended_batches[0][0]
-y = appended_batches[0][1]
-convert_array_to_numpy([1,2,3,4,3,2,1])
-foo="bar"
+
+#Append targets to generated batches
 training = []
 target = []
 for x in range(0, batch_number):
     training.append(appended_batches[x][0])
     target.append(appended_batches[x][1])
-for x in range(0, 30000): #Decides number of rounds of training
+    
+for x in range(0, episodes): 
     for training_round in range(0, batch_number):
-        print("Round: " + str(x) + " / " + str(30000))
+        print("Round: " + str(x) + " / " + str(episodes))
         print("Batch: " + str(training_round))
         training_data = convert_array_to_numpy(training[training_round])
         target_data = convert_array_to_numpy(target[training_round])
         neural_net.fit(training_data, target_data, epochs=1)
+
+#Prints the outputs of predictions
 print("***********************\n"+str([0,0,4,4,-4,4,2,2,-2,-4]))
 print(neural_net.predict(convert_array_to_numpy([0,0,4,4,-4,4,2,2,-2,-4])))
 print("***********************\n"+str([0,8,0,0,-4,4,2,2,-2,-4]))
@@ -202,7 +205,7 @@ print("***********************\n"+str([0,0,0,0,0,0,2,0,0,0]))
 print(neural_net.predict(convert_array_to_numpy([0,0,0,0,0,0,2,0,0,0])))
 print("***********************\n"+str([0,0,0,0,0,0,0,0,2,0]))
 print(neural_net.predict(convert_array_to_numpy([0,0,0,0,0,0,0,0,2,0])))
-print("***********************\nSaving neural network.")
+print("***********************\nTraining complete. Saving neural network to .obj file.")
 save_neural_network(neural_net)
 print("done")
 
